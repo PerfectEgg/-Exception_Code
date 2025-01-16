@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class Note : MonoBehaviour
 {
+    public GameManager gameManager; // GameManager 참조
+
     public int lane;        // 레인 번호 (1, 2, 3, 4)
     public float timing;    // 노트가 떨어지는 타이밍 (초 단위)
     public bool isHit;      // 노트가 판정되었는지 여부
@@ -33,6 +35,7 @@ public class Note : MonoBehaviour
             // 화면 밖으로 나가면 노트 삭제
             if (transform.position.y < -6f)
             {
+                gameManager.RemoveNoteFromList(this); // GameManager에서 제거
                 Destroy(gameObject);
             }
         }
@@ -45,6 +48,7 @@ public class Note : MonoBehaviour
             judgement.ApplyJudgement(this, currentTime);  // 판정 수행
         }
     }
+
 }
 
 
@@ -70,7 +74,6 @@ public class RedNote : Note
 
     public override void CheckHit(float currentTime, NoteJudgement judgement)
     {
-        // RedNote에서 특별한 로직 없이 NoteJudgement를 그대로 사용
         if (Input.GetKeyDown(hitKey))  // 유저가 RedNote에 해당하는 키를 눌렀을 때
         {
             judgement.ApplyJudgement(this, currentTime);
