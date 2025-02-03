@@ -1,10 +1,15 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class LineManager : MonoBehaviour
 {
     [SerializeField] private GameSettings gameSettings;  // GameSettings 참조 (Inspector에서 연결)
     public GameObject linesParent;  // 모든 라인 오브젝트를 묶은 부모 오브젝트 (lines)
-    private LineEffect[] lineEffects;  // 라인별 효과를 관리할 배열
+    public GameObject effectsParent;  // 모든 이팩트 오브젝트를 묶은 부모 오브젝트 (effects)
+    public InputAction[] lineActions; // 새로운 Input System에서 키 입력 관리
+
+    private LineEffect[] lineEffects;  // 라인별 이팩트
+    private KeyCode[] lineKeys;  // 키 매핑
 
     void Start()
     {
@@ -14,42 +19,43 @@ public class LineManager : MonoBehaviour
             return;
         }
 
-        // linesParent에서 모든 LineEffect 컴포넌트를 찾아서 배열로 저장
-        lineEffects = linesParent.GetComponentsInChildren<LineEffect>();
+        // linesParent에서 모든 LineEffect 찾기
+        lineEffects = effectsParent.GetComponentsInChildren<LineEffect>();
+        lineKeys = gameSettings.lineKeys;  // 키 설정 로드
 
-        // 각 LineEffect에 키 정보를 전달
-        for (int i = 0; i < lineEffects.Length; i++)
+        if (lineEffects.Length != lineKeys.Length)
         {
-            if (i < gameSettings.lineKeys.Length)
-            {
-                lineEffects[i].SetLineKey(gameSettings.lineKeys[i]);  // 각 라인의 키 설정
-            }
-            else
-            {
-                Debug.LogWarning("LineManager: lineKeys array length doesn't match lines count.");
-            }
+            Debug.LogError("LineManager: LineEffect 개수와 키 개수가 맞지 않습니다!");
+        }
+    }
+
+    void Awake()
+    {
+        foreach (var action in lineActions)
+        {
+            action.Enable();  // 입력 활성화
         }
     }
 
     void Update()
     {
-        // 각 LineEffect가 활성화될 수 있도록 처리
         for (int i = 0; i < lineEffects.Length; i++)
         {
-            if (Input.GetKeyDown(lineEffects[i].lineKey))
+            if (Input.GetKey(lineKeys[i]))
             {
                 lineEffects[i].ActivateEffect();
             }
         }
     }
 
-    // LineEffect가 키를 요청하는 메서드
-    public KeyCode GetLineKey(int lineIndex)
+    void LateUpdate()
     {
-        if (lineIndex >= 0 && lineIndex < gameSettings.lineKeys.Length)
+        for (int i = 0; i < lineEffects.Length; i++)
         {
-            return gameSettings.lineKeys[lineIndex];
+            if (!Input.GetKey(lineKeys[i]))  // 키가 눌려 있지 않으면 강제로 이팩트 해제
+            {   
+                lineEffects[i].DeactivateEffect();
+            }
         }
-        return KeyCode.None;  // 기본값
     }
 }
