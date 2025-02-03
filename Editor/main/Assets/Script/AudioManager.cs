@@ -11,9 +11,11 @@ public class AudioManager : MonoBehaviour
     public AudioClip audioClip;      // 불러올 오디오 파일 (MP3 파일)
     public SongLoader songLoader;    // 마디선 생성을 위한 클래스
     public Button loadButton;        // 로드 버튼
+    public ScrollController scrollController;
     public TMP_InputField songNameInputField = null;  // 사용자가 텍스트를 입력하는 InputField
     public string songName = null;                    // 노래 이름을 저장할 변수
 
+    private float measure_height;
 
     void Start()
     {

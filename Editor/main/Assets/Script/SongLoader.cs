@@ -13,14 +13,15 @@ public class SongLoader : MonoBehaviour
     public ScrollRect scrollRect;
     public Transform beatContainer;  // 스프라이트를 배치할 부모 객체
 
+    private float total_Length = 0;
     private int bpm;
     private int songLength;
     private string song;
 
+
     // 노래를 불러오기 버튼을 눌렀을 때 호출되는 함수
     public void LoadSong(string songName)
     {
-        Debug.Log("yes: " + song);
         song = songName;
         
         // 파일 이름에서 BPM과 길이를 추출하는 예시 (정규 표현식을 사용)
@@ -32,6 +33,8 @@ public class SongLoader : MonoBehaviour
             // 총 마디 수 계산
             float totalBeats = songLength * bpm;  // 총 박자 수
             float totalMeasures = totalBeats / 4; // 1마디에 4박자
+
+            total_Length = totalMeasures * 8.5f;
 
             // 화면에 마디 스프라이트 띄우기
             SetMeasures(totalMeasures);
@@ -79,6 +82,16 @@ public class SongLoader : MonoBehaviour
         {
             float screenHeight = scrollRect.viewport.rect.height;  // 스크롤 레크트 뷰포트의 높이
             float measureHeight = screenHeight / totalMeasures;  // 마디 한 개의 높이
+            float lineHeight = screenHeight; // 마디 하나.
+
+            // 레인 생성
+            GameObject line = Instantiate(lines);
+            line.transform.SetParent(parentMeasure.transform, false);  // 부모 오브젝트에 자식으로 추가
+
+            // 레인 위치 조정
+            RectTransform lineRect = line.GetComponent<RectTransform>();
+            lineRect.anchoredPosition = new Vector2(0, i * 8.5f);  // 레인의 y 좌표 계산
+            lineRect.sizeDelta = new Vector2(lines.GetComponent<RectTransform>().rect.width, lineHeight);  // 레인의 크기 조정
 
             // 마디 생성
             GameObject measure = Instantiate(measurePrefab);
@@ -86,8 +99,8 @@ public class SongLoader : MonoBehaviour
 
             // 마디 위치 조정
             RectTransform measureRect = measure.GetComponent<RectTransform>();
-            measureRect.anchoredPosition = new Vector2(0, i * measureHeight);  // 마디의 y 좌표 계산
-            measureRect.sizeDelta = new Vector2(lines.GetComponent<RectTransform>().rect.width, measureHeight);  // 마디 크기 조정
+            measureRect.anchoredPosition = new Vector2(0.1f, -0.525f + i * 8.5f);  // 마디의 y 좌표 계산
+            measureRect.sizeDelta = new Vector2(lines.GetComponent<RectTransform>().rect.width, lineHeight);  // 마디 크기 조정
         }
     }
 }
